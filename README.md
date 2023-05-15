@@ -1,8 +1,8 @@
-<p align="center"><img src="https://raw.githubusercontent.com/pawanpaudel93/scrapy-arweave/main/logo.png" alt="original" width="400" height="300"></p>
+<p align="center"><img src="logo.png" alt="original" width="100%" height="300"></p>
 
 <h1 align="center">Welcome to Scrapy-Arweave</h1>
 <p>
-  <img alt="Version" src="https://img.shields.io/badge/version-0.0.3-blue.svg?cacheSeconds=2592000" />
+  <img alt="Version" src="https://img.shields.io/badge/version-0.0.1-blue.svg?cacheSeconds=2592000" />
 </p>
 
 Scrapy is a popular open-source and collaborative python framework for extracting the data you need from websites. scrapy-arweave provides scrapy pipelines and feed exports to store items into [Arweave](https://arweave.org/).

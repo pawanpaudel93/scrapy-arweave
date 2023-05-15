@@ -40,10 +40,10 @@ class ArweaveStorageClient:
     def load_wallet(self, wallet_jwk):
         if os.path.isfile(wallet_jwk):
             self.wallet = Wallet(wallet_jwk)
-            self.wallet.api_url = self.GATEWAY_URL
+            # self.wallet.api_url = self.GATEWAY_URL
         else:
             self.wallet = Wallet.from_data(wallet_jwk)
-            self.wallet.api_url = self.GATEWAY_URL
+            # self.wallet.api_url = self.GATEWAY_URL
 
     def upload(self, file_path, file):
         try:
@@ -59,6 +59,7 @@ class ArweaveStorageClient:
         try:
             with open(file_path, 'rb', buffering=0) as file_handler:
                 tx = Transaction(self.wallet, file_handler=file_handler, file_path=file_path)
+                tx.api_url = self.GATEWAY_URL
                 mime_type, _ = mimetypes.guess_type(file_path)
                 tx.add_tag('Content-Type', mime_type)
                 tx.sign()
