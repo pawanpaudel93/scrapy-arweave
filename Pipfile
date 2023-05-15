@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+scrapy = "*"
+pillow = "*"
+pyarweave = {git = "https://github.com/xloem/pyarweave.git"}
+
+[dev-packages]
+black = "*"
+isort = "*"
+twine = "*"
+pylint = "*"
+python-decouple = "*"
+pytest = "*"
+autopep8 = "*"
+
+[requires]
+python_version = "3.10"
+
+[pipenv]
+allow_prereleases = true
