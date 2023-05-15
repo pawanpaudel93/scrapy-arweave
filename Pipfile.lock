@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4a32fac82e8a9dde8f0c90e79de93abfc47107fcf9f1758744e4c375e13878ab"
+            "sha256": "5929de7e9ace04fc17e6592bcb8257adb6e19b14e1bce3ac09f604021500335a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -485,12 +485,8 @@
             "version": "==0.2.1"
         },
         "pyarweave": {
-            "git": "https://github.com/xloem/pyarweave.git",
-            "hashes": [
-                "sha256:328d4c7da694c6e2b9a6e8d3784a8d76367a985af3d0c07e61705074785b4cf5",
-                "sha256:6741105445d178731abf0bc7dfabe7836701eccb71dea8bc9da8d116f0262c3e"
-            ],
-            "ref": "d7d41ec35c05cdc403cfbd021820d169bd04068a"
+            "git": "https://github.com/pawanpaudel93/pyarweave.git",
+            "ref": "6bf037426be571fb267ffc787916d328df9f407c"
         },
         "pyasn1": {
             "hashes": [

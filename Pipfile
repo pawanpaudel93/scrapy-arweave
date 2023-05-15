@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 scrapy = "*"
 pillow = "*"
-pyarweave = {git = "https://github.com/xloem/pyarweave.git"}
+pyarweave = {git = "https://github.com/pawanpaudel93/pyarweave.git"}
 
 [dev-packages]
 black = "*"
