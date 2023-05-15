@@ -3,9 +3,9 @@ import mimetypes
 import os
 from urllib.parse import urljoin
 
-from ar import DataItem, Wallet
+from ar import ANS104DataItemHeader, DataItem, Wallet
 from ar.transaction import Transaction
-from ar.utils.transaction_uploader import get_uploader
+from ar.utils.transaction_uploader import create_tag, get_uploader
 from bundlr import Node
 
 
@@ -46,8 +46,10 @@ class ArweaveStorageClient:
             self.wallet.api_url = self.GATEWAY_URL
 
     def upload(self, file_path, file):
+        mime_type, _ = mimetypes.guess_type(file_path)
         try:
-            dataitem = DataItem(data=file)
+            tags = [create_tag("Content-Type", mime_type, self.format == 2)]
+            dataitem = DataItem(data=file, header=ANS104DataItemHeader(tags=tags))
             dataitem.sign(self.wallet.rsa)
             node = Node()
             result = node.send_tx(dataitem.tobytes())
@@ -60,7 +62,6 @@ class ArweaveStorageClient:
             with open(file_path, 'rb', buffering=0) as file_handler:
                 tx = Transaction(self.wallet, file_handler=file_handler, file_path=file_path)
                 tx.api_url = self.GATEWAY_URL
-                mime_type, _ = mimetypes.guess_type(file_path)
                 tx.add_tag('Content-Type', mime_type)
                 tx.sign()
 

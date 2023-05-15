@@ -486,7 +486,7 @@
         },
         "pyarweave": {
             "git": "https://github.com/pawanpaudel93/pyarweave.git",
-            "ref": "6bf037426be571fb267ffc787916d328df9f407c"
+            "ref": "76f997d2ff79240b3f190a276227ba4b0ee77fef"
         },
         "pyasn1": {
             "hashes": [

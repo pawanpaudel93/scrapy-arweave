@@ -14,7 +14,9 @@ AUTHOR = "Pawan Paudel"
 REQUIRES_PYTHON = ">=3.0"
 VERSION = "0.0.1"
 
-REQUIRED = ["pyarweave"]
+REQUIRED = [
+    "pyarweave @ git+https://github.com/pawanpaudel93/pyarweave.git#egg=pyarweave",
+]
 
 EXTRAS = {
     # 'fancy feature': ['django'],

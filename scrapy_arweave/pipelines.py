@@ -51,12 +51,12 @@ class FilesPipeline(ParentFilesPipeline):
 
     STORE_SCHEMES = {
         '': ArweaveStorageFilesStore,
-        'arweave': ArweaveStorageFilesStore,
+        'ar': ArweaveStorageFilesStore,
     }
 
     @classmethod
     def init_settings(cls, settings):
-        arweave_store = cls.STORE_SCHEMES['arweave']
+        arweave_store = cls.STORE_SCHEMES['ar']
         arweave_store.WALLET_JWK = settings['WALLET_JWK']
         arweave_store.GATEWAY_URL = settings["GATEWAY_URL"] or "https://arweave.net"
 
@@ -68,7 +68,7 @@ class FilesPipeline(ParentFilesPipeline):
 
     def _get_store(self, uri):
         if os.path.isabs(uri):  # to support win32 paths like: C:\\some\dir
-            scheme = "arweave"
+            scheme = "ar"
         else:
             scheme = urlparse(uri).scheme
         store_cls = self.STORE_SCHEMES[scheme]

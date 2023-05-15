@@ -48,7 +48,7 @@ pip install scrapy-arweave
  ```python
  ITEM_PIPELINES = {
   'scrapy_arweave.pipelines.ImagesPipeline': 1,
-  'scrapy-arweave.pipelines.FilesPipeline': 1
+  'scrapy_arweave.pipelines.FilesPipeline': 1
  }
  ```
 
@@ -64,10 +64,10 @@ pip install scrapy-arweave
 
  ```python
  # for ImagesPipeline
- IMAGES_STORE = 'arweave://images'
+ IMAGES_STORE = 'ar://images'
  
  # For FilesPipeline
- FILES_STORE = 'arweave://files'
+ FILES_STORE = 'ar://files'
  ```
 
  For more info regarding ImagesPipeline and FilesPipline. [See here](https://docs.scrapy.org/en/latest/topics/media-pipeline.html)
@@ -86,7 +86,7 @@ pip install scrapy-arweave
  GATEWAY_URL = "https://arweave.net"
 
  FEEDS = {
-  'arweave://house.json': {
+  'ar://house.json': {
    "format": "json"
   },
  }

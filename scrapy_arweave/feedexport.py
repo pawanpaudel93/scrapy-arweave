@@ -7,16 +7,7 @@ from scrapy.utils.project import get_project_settings
 logger = logging.getLogger(__name__)
 
 
-class ArweaveFeedStorage(BlockingFeedStorage):
-    def _store_in_thread(self, file):
-        file.seek(0)
-        tx_id = self.client.upload(self.file_name, file)
-        permalink = self.client.get_url(tx_id)
-        logging.info(permalink)
-        file.close()
-
-
-class ArweaveStorageFeedStorage(ArweaveFeedStorage):
+class ArweaveStorageFeedStorage(BlockingFeedStorage):
     def __init__(self, uri, *, feed_options=None):
         settings = get_project_settings()
         from .client import ArweaveStorageClient
@@ -27,9 +18,16 @@ class ArweaveStorageFeedStorage(ArweaveFeedStorage):
         wallet_jwk = settings.get("WALLET_JWK")
         self.client = ArweaveStorageClient(wallet_jwk, gateway_url)
 
+    def _store_in_thread(self, file):
+        file.seek(0)
+        tx_id = self.client.upload(file.name, file)
+        permalink = self.client.get_url(tx_id)
+        logging.info(permalink)
+        file.close()
+
 
 def get_feed_storages():
     return {
         '': 'scrapy_arweave.feedexport.ArweaveStorageFeedStorage',
-        'arweave': 'scrapy_arweave.feedexport.ArweaveStorageFeedStorage',
+        'ar': 'scrapy_arweave.feedexport.ArweaveStorageFeedStorage',
     }
