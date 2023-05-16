@@ -53,7 +53,7 @@ VERSION = "0.0.1"
 
 REQUIRED = [
     "python-magic",
-    "pyarweave @ git+https://github.com/pawanpaudel93/pyarweave.git#egg=pyarweave",
+    "pyarweave",
 ]
 
 EXTRAS = {
