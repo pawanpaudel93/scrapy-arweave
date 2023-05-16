@@ -12,35 +12,31 @@ from scrapy.exceptions import NotConfigured, ScrapyDeprecationWarning
 from scrapy.http import Request
 from scrapy.pipelines.files import FileException
 from scrapy.pipelines.files import FilesPipeline as ParentFilesPipeline
-from scrapy.pipelines.files import FSFilesStore as ParentFSFilesStore
+from scrapy.pipelines.files import FSFilesStore
 from scrapy.pipelines.images import ImageException
 from scrapy.settings import Settings
 from scrapy.utils.log import failure_to_exc_info
 from scrapy.utils.python import get_func_args, to_bytes
 from scrapy.utils.request import referer_str
-from twisted.internet import defer, threads
+from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
 
 
-class FSFilesStore(ParentFSFilesStore):
+class ArweaveFilesStore(FSFilesStore):
     WALLET_JWK = ""
     GATEWAY_URL = ""
 
-    def persist_file(self, path, buf, info, meta=None, headers=None):
-        absolute_path = self._get_filesystem_path(path)
-        self._mkdir(os.path.dirname(absolute_path), info)
-        with open(absolute_path, 'wb') as f:
-            f.write(buf.getvalue())
-        return threads.deferToThread(self.client.upload, file_path=absolute_path, file=buf.getvalue())
-
-
-class ArweaveStorageFilesStore(FSFilesStore):
     def __init__(self, basedir):
         from .client import ArweaveStorageClient
 
         super().__init__(basedir)
         self.client = ArweaveStorageClient(self.WALLET_JWK, self.GATEWAY_URL)
+
+    def persist_file(self, path, buf, info, meta=None, headers=None):
+        absolute_path = self._get_filesystem_path(path)
+        super().persist_file(path, buf, info, meta, headers)
+        return self.client.upload(absolute_path, buf.getvalue())
 
     def stat_file(self, path, info):
         return {}
@@ -50,8 +46,8 @@ class FilesPipeline(ParentFilesPipeline):
     """Custom Files Abstract pipeline that implement the file downloading"""
 
     STORE_SCHEMES = {
-        '': ArweaveStorageFilesStore,
-        'ar': ArweaveStorageFilesStore,
+        '': ArweaveFilesStore,
+        'ar': ArweaveFilesStore,
     }
 
     @classmethod
@@ -156,8 +152,7 @@ class FilesPipeline(ParentFilesPipeline):
         path = self.file_path(request, response=response, info=info, item=item)
         buf = BytesIO(response.body)
         buf.seek(0)
-        result = yield self.store.persist_file(path, buf, info)
-        return result
+        return self.store.persist_file(path, buf, info)
 
 
 class ImagesPipeline(FilesPipeline):
@@ -213,13 +208,16 @@ class ImagesPipeline(FilesPipeline):
         return self.image_downloaded(response, request, info, item=item)
 
     def image_downloaded(self, response, request, info, *, item=None):
+        tx_id = None
         for path, image, buf in self.get_images(response, request, info, item=item):
             buf.seek(0)
             width, height = image.size
-            result = yield self.store.persist_file(
+            result = self.store.persist_file(
                 path, buf, info, meta={'width': width, 'height': height}, headers={'Content-Type': 'image/jpeg'}
             )
-        return result
+            if tx_id is None:
+                tx_id = result
+        return tx_id
 
     def get_images(self, response, request, info, *, item=None):
         path = self.file_path(request, response=response, info=info, item=item)

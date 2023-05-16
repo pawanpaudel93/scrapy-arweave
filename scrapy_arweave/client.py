@@ -15,6 +15,7 @@ class ArweaveStorageClient:
     def __init__(self, wallet_jwk, gateway_url) -> None:
         self.GATEWAY_URL = gateway_url
         self.load_wallet(wallet_jwk)
+        self.node = Node()
 
     def calculate_hash(self, filepath, algorithm='sha256', chunk_size=65536):
         """
@@ -38,21 +39,33 @@ class ArweaveStorageClient:
         return hash_value
 
     def load_wallet(self, wallet_jwk):
-        if os.path.isfile(wallet_jwk):
-            self.wallet = Wallet(wallet_jwk)
-            self.wallet.api_url = self.GATEWAY_URL
-        else:
-            self.wallet = Wallet.from_data(wallet_jwk)
-            self.wallet.api_url = self.GATEWAY_URL
-
-    def upload(self, file_path, file):
-        mime_type, _ = mimetypes.guess_type(file_path)
         try:
-            tags = [create_tag("Content-Type", mime_type, self.format == 2)]
-            dataitem = DataItem(data=file, header=ANS104DataItemHeader(tags=tags))
+            if os.path.isfile(wallet_jwk):
+                self.wallet = Wallet(wallet_jwk)
+            else:
+                self.wallet = Wallet.from_data(wallet_jwk)
+            self.wallet.api_url = self.GATEWAY_URL
+        except:
+            raise Exception("Error loading wallet jwk")
+
+    def _get_mime_type(self, file_path):
+        mimetype, _ = mimetypes.guess_type(file_path)
+        if mimetype is None:
+            try:
+                import magic
+
+                mimetype = magic.from_file(file_path, mime=True)
+            except ImportError:
+                pass
+        return mimetype
+
+    def upload(self, file_path, file_buffer):
+        mime_type = self._get_mime_type(file_path)
+        try:
+            tags = [create_tag("Content-Type", mime_type, True)]
+            dataitem = DataItem(data=file_buffer, header=ANS104DataItemHeader(tags=tags))
             dataitem.sign(self.wallet.rsa)
-            node = Node()
-            result = node.send_tx(dataitem.tobytes())
+            result = self.node.send_tx(dataitem.tobytes())
             txid = result['id']
             return txid
         except:
@@ -70,7 +83,6 @@ class ArweaveStorageClient:
                 while not uploader.is_complete:
                     uploader.upload_chunk()
                 return tx.id
-
         except:
             pass
 

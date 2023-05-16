@@ -1,9 +1,19 @@
 import io
 import os
+import subprocess
 import sys
 from shutil import rmtree
 
 from setuptools import Command, setup
+from setuptools.command.install import install
+
+
+class PostInstallCommand(install):
+    def run(self):
+        install.run(self)
+        # Execute post_install.py script
+        subprocess.run(['python', 'post_install.py'], check=True)
+
 
 # Package meta-data.
 NAME = "scrapy_arweave"
@@ -15,6 +25,7 @@ REQUIRES_PYTHON = ">=3.0"
 VERSION = "0.0.1"
 
 REQUIRED = [
+    "python-magic",
     "pyarweave @ git+https://github.com/pawanpaudel93/pyarweave.git#egg=pyarweave",
 ]
 
@@ -105,10 +116,10 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
     ],
     # $ setup.py publish support.
-    cmdclass={
-        "upload": UploadCommand,
-    },
+    cmdclass={"upload": UploadCommand, "install": PostInstallCommand},
 )
