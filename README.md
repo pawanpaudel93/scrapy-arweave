@@ -21,12 +21,31 @@ pip install scrapy-arweave
 
 ## Usage
 
-1. Install scrapy-arweave.
+1. Install scrapy-arweave and some additional requirements.
 
  ```shell
  pip install scrapy-arweave
 
  ```
+
+  It has some requirements that must be installed as well:
+
+### Debian/Ubuntu
+
+  ```shell
+  sudo apt-get install libmagic1
+  ```
+
+### Windows
+
+  ```shell
+  pip install python-magic-bin
+  ```
+
+### OSX
+
+- When using Homebrew: `brew install libmagic`
+- When using macports: `port install file`
 
 2. Add 'scrapy-arweave.pipelines.ImagesPipeline' and/or 'scrapy-arweave.pipelines.FilesPipeline' to ITEM_PIPELINES setting in your Scrapy project if you need to store images or other files to Arweave.
  For Images Pipeline, use:
@@ -47,7 +66,7 @@ pip install scrapy-arweave
 
  ```python
  ITEM_PIPELINES = {
-  'scrapy_arweave.pipelines.ImagesPipeline': 1,
+  'scrapy_arweave.pipelines.ImagesPipeline': 0,
   'scrapy_arweave.pipelines.FilesPipeline': 1
  }
  ```
@@ -63,7 +82,7 @@ pip install scrapy-arweave
  Add store path of files or images for Web3Storage, LightHouse, Moralis, Pinata or Estuary as required.
 
  ```python
- # for ImagesPipeline
+ # For ImagesPipeline
  IMAGES_STORE = 'ar://images'
  
  # For FilesPipeline
@@ -82,13 +101,13 @@ pip install scrapy-arweave
  Then set WALLET_JWK and GATEWAY_URL. And, set FEEDS as following to finally store the scraped data.
 
  ```python
- WALLET_JWK = "<WALLET_JWK>" # It can be wallet file path or jwk data
+ WALLET_JWK = "<WALLET_JWK>" # It can be wallet jwk file path or jwk data itself
  GATEWAY_URL = "https://arweave.net"
 
  FEEDS = {
-  'ar://house.json': {
-   "format": "json"
-  },
+    'ar://house.json': {
+     "format": "json"
+   },
  }
  ```
 
