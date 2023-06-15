@@ -2,7 +2,7 @@
 
 <h1 align="center">Welcome to Scrapy-Arweave</h1>
 <p>
-  <img alt="Version" src="https://img.shields.io/badge/version-0.0.2-blue.svg?cacheSeconds=2592000" />
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000" />
 </p>
 
 Scrapy is a popular open-source and collaborative python framework for extracting the data you need from websites. scrapy-arweave provides scrapy pipelines and feed exports to store items into [Arweave](https://arweave.org/).
@@ -115,10 +115,6 @@ pip install scrapy-arweave
  See more on FEEDS [here](https://docs.scrapy.org/en/latest/topics/feed-exports.html#feeds)
 
 4. Now perform the scrapping as you would normally.
-
-## TODO
-
-- [ ] Upload files/images concurrently to Arweave.
 
 ## Author
 
