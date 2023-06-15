@@ -15,9 +15,10 @@ Scrapy is a popular open-source and collaborative python framework for extractin
 pip install scrapy-arweave
 ```
 
-## Example
+## Examples
 
-[scrapy-arweave-example](https://github.com/pawanpaudel93/scrapy-arweave-example)
+- [scrapy-arweave-example](https://github.com/pawanpaudel93/scrapy-arweave-example)
+- [scrapy-arweave-douban](https://github.com/pawanpaudel93/scrapy-arweave-douban)
 
 ## Usage
 
@@ -114,6 +115,10 @@ pip install scrapy-arweave
  See more on FEEDS [here](https://docs.scrapy.org/en/latest/topics/feed-exports.html#feeds)
 
 4. Now perform the scrapping as you would normally.
+
+## TODO
+
+- [ ] Upload files/images concurrently to Arweave.
 
 ## Author
 
