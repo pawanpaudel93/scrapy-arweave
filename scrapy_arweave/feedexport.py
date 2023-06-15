@@ -20,7 +20,11 @@ class ArweaveFeedStorage(BlockingFeedStorage):
 
     def _store_in_thread(self, file):
         file.seek(0)
-        tx_id = self.client.upload(file.name, file.read())
+        try:
+            file_hash = self.client.calculate_hash(file.name)
+            tx_id = self.client.get_tx_id(file_hash)
+        except:
+            tx_id = self.client.upload(file.name, file.read())
         permalink = self.client.get_url(tx_id)
         logging.info(permalink)
         file.close()

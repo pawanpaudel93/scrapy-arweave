@@ -18,7 +18,7 @@ from scrapy.settings import Settings
 from scrapy.utils.log import failure_to_exc_info
 from scrapy.utils.python import get_func_args, to_bytes
 from scrapy.utils.request import referer_str
-from twisted.internet import defer
+from twisted.internet import defer, threads
 
 logger = logging.getLogger(__name__)
 
@@ -36,10 +36,15 @@ class ArweaveFilesStore(FSFilesStore):
     def persist_file(self, path, buf, info, meta=None, headers=None):
         absolute_path = self._get_filesystem_path(path)
         super().persist_file(path, buf, info, meta, headers)
-        return self.client.upload(absolute_path, buf.getvalue())
+        file_hash = self.client.calculate_hash(absolute_path)
+        dfd = threads.deferToThread(self.client.upload, absolute_path, buf.getvalue(), file_hash)
+        return dfd
 
     def stat_file(self, path, info):
-        return {}
+        absolute_path = self._get_filesystem_path(path)
+        file_hash = self.client.calculate_hash(absolute_path)
+        dfd = threads.deferToThread(self.client.get_tx_id, file_hash)
+        return dfd.addCallback(lambda tx_id: {"tx_id": tx_id})
 
 
 class FilesPipeline(ParentFilesPipeline):
@@ -127,8 +132,15 @@ class FilesPipeline(ParentFilesPipeline):
         self.inc_stats(info.spider, status)
 
         try:
-            path = self.file_path(request, response=response, info=info, item=item)
-            tx_id = self.file_downloaded(response, request, info, item=item)
+            dfd = self.file_downloaded(response, request, info, item=item)
+
+            def _onsuccess(tx_id):
+                permalink = self.store.client.get_url(tx_id)
+                return {'url': request.url, 'tx_id': tx_id, "permalink": permalink}
+
+            if dfd:
+                dfd.addCallbacks(_onsuccess, lambda _: None)
+            return dfd
         except FileException as exc:
             logger.warning(
                 'File (error): Error processing file from %(request)s ' 'referred in <%(referer)s>: %(errormsg)s',
@@ -145,8 +157,6 @@ class FilesPipeline(ParentFilesPipeline):
                 extra={'spider': info.spider},
             )
             raise FileException(str(exc))
-        permalink = self.store.client.get_url(tx_id)
-        return {'url': request.url, 'tx_id': tx_id, "permalink": permalink}
 
     def file_downloaded(self, response, request, info, *, item=None):
         path = self.file_path(request, response=response, info=info, item=item)
@@ -208,16 +218,18 @@ class ImagesPipeline(FilesPipeline):
         return self.image_downloaded(response, request, info, item=item)
 
     def image_downloaded(self, response, request, info, *, item=None):
-        tx_id = None
+        result = None
         for path, image, buf in self.get_images(response, request, info, item=item):
             buf.seek(0)
             width, height = image.size
             result = self.store.persist_file(
-                path, buf, info, meta={'width': width, 'height': height}, headers={'Content-Type': 'image/jpeg'}
+                path,
+                buf,
+                info,
+                meta={'width': width, 'height': height},
+                headers={'Content-Type': 'image/jpeg'},
             )
-            if tx_id is None:
-                tx_id = result
-        return tx_id
+        return result
 
     def get_images(self, response, request, info, *, item=None):
         path = self.file_path(request, response=response, info=info, item=item)

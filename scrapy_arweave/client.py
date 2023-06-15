@@ -3,7 +3,9 @@ import mimetypes
 import os
 from urllib.parse import urljoin
 
+import requests
 from ar import ANS104DataItemHeader, DataItem, Wallet
+from ar.peer import HTTPClient, Peer
 from ar.transaction import Transaction
 from ar.utils.transaction_uploader import create_tag, get_uploader
 from bundlr import Node
@@ -16,6 +18,7 @@ class ArweaveStorageClient:
         self.GATEWAY_URL = gateway_url
         self.load_wallet(wallet_jwk)
         self.node = Node()
+        self.peer = Peer()
 
     def calculate_hash(self, filepath, algorithm='sha256', chunk_size=65536):
         """
@@ -59,10 +62,12 @@ class ArweaveStorageClient:
                 pass
         return mimetype
 
-    def upload(self, file_path, file_buffer):
+    def upload(self, file_path, file_buffer, hash=None):
         mime_type = self._get_mime_type(file_path)
         try:
             tags = [create_tag("Content-Type", mime_type, True)]
+            if hash:
+                tags.append(create_tag("File-Hash", hash, True))
             dataitem = DataItem(data=file_buffer, header=ANS104DataItemHeader(tags=tags))
             dataitem.sign(self.wallet.rsa)
             result = self.node.send_tx(dataitem.tobytes())
@@ -76,6 +81,8 @@ class ArweaveStorageClient:
                 tx = Transaction(self.wallet, file_handler=file_handler, file_path=file_path)
                 tx.api_url = self.GATEWAY_URL
                 tx.add_tag('Content-Type', mime_type)
+                if hash:
+                    tx.add_tag('File-Hash', hash)
                 tx.sign()
 
                 uploader = get_uploader(tx, file_handler)
@@ -87,6 +94,24 @@ class ArweaveStorageClient:
             pass
 
         raise Exception("Upload Error")
+
+    def get_tx_id(self, hash):
+        query = '''query {
+            transactions(
+                first: 1,
+                tags: [{ name: "File-Hash", values: ["%s"]}]
+            ) {
+                edges {
+                    node {
+                        id
+                    }
+                }
+            }
+        }''' % (
+            hash
+        )
+        response = self.peer.graphql(query)
+        return response.get("data").get("transactions").get("edges")[0].get("node").get("id")
 
     def get_url(self, tx_id):
         return urljoin(self.GATEWAY_URL, tx_id)
