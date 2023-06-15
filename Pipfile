@@ -6,8 +6,8 @@ name = "pypi"
 [packages]
 scrapy = "*"
 pillow = "*"
-pyarweave = "*"
 python-magic = "*"
+pyarweave = "*"
 
 [dev-packages]
 black = "*"
